@@ -1,6 +1,6 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:fyp_admin_panel/pages/home_page.dart';
+import 'package:fyp_admin_panel/pages/parent.dart';
 
 import 'firebase_options.dart';
 
@@ -25,7 +25,7 @@ class MyApp extends StatelessWidget {
           background: Colors.white,
         ),
       ),
-      home: const HomePage(),
+      home: const Parent(),
     );
   }
 }
