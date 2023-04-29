@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:fyp_admin_panel/widgets/component_a.dart';
 import 'package:fyp_admin_panel/widgets/component_b.dart';
+import 'package:fyp_admin_panel/widgets/driver_display.dart';
 import 'package:fyp_admin_panel/widgets/home.dart';
+import 'package:fyp_admin_panel/widgets/route_display.dart';
 
 final indexValueNotifier = ValueNotifier<int>(0);
 final List<Map<String, dynamic>> navigators = [
@@ -21,23 +23,18 @@ final List<Map<String, dynamic>> navigators = [
     'ui': const ComponentB(),
   },
   {
-    'icon': Icons.business,
+    'icon': Icons.add_box,
     'name': 'Add station',
     'ui': const ComponentA(),
   },
   {
-    'icon': Icons.location_city,
-    'name': 'Terminals',
-    'ui': const ComponentB(),
-  },
-  {
     'icon': Icons.view_array_outlined,
     'name': 'Routes',
-    'ui': const ComponentB(),
+    'ui': const RouteDisplay(),
   },
   {
     'icon': Icons.drive_eta_rounded,
     'name': 'Drivers',
-    'ui': const ComponentA(),
+    'ui': const DriverDisplay(),
   },
 ];

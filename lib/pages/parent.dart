@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:fyp_admin_panel/data/firestore_manager.dart';
+import 'package:fyp_admin_panel/data/resources.dart';
 import 'package:fyp_admin_panel/widgets/navigation_list.dart';
 
 import '../ui_builders/component_builder.dart';
@@ -13,6 +15,12 @@ class Parent extends StatefulWidget {
 }
 
 class _ParentState extends State<Parent> {
+  @override
+  void initState() {
+    firestoreManager = FirestoreManager();
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

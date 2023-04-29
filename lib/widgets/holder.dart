@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'header.dart';
+
 class Holder extends StatelessWidget {
   const Holder({
     super.key,
@@ -17,7 +19,29 @@ class Holder extends StatelessWidget {
         borderRadius: BorderRadius.circular(12.0),
       ),
       child: Center(
-        child: child,
+        child: Column(
+          children: [
+            Expanded(
+              flex: 1,
+              child: Container(
+                height: double.infinity,
+                width: double.infinity,
+                margin: const EdgeInsets.only(bottom: 12.0),
+                decoration: BoxDecoration(
+                  color: Colors.grey[100],
+                  borderRadius: BorderRadius.circular(12.0),
+                ),
+                child: const Center(
+                  child: Header(),
+                ),
+              ),
+            ),
+            Expanded(
+              flex: 7,
+              child: child,
+            ),
+          ],
+        ),
       ),
     );
   }
