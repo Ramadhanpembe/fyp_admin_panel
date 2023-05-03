@@ -17,7 +17,7 @@ class _DriverDisplayState extends State<DriverDisplay> {
 
   @override
   void initState() {
-    _driverStream = firestoreManager.getAvailableDrivers();
+    _driverStream = firestoreManager.getAllDrivers();
     super.initState();
   }
 

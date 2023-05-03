@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:fyp_admin_panel/widgets/component_a.dart';
-import 'package:fyp_admin_panel/widgets/component_b.dart';
+import 'package:fyp_admin_panel/widgets/add_route_display.dart';
+import 'package:fyp_admin_panel/widgets/add_station_display.dart';
+import 'package:fyp_admin_panel/widgets/add_terminal_display.dart';
 import 'package:fyp_admin_panel/widgets/driver_display.dart';
 import 'package:fyp_admin_panel/widgets/home.dart';
 import 'package:fyp_admin_panel/widgets/route_display.dart';
@@ -15,17 +16,17 @@ final List<Map<String, dynamic>> navigators = [
   {
     'icon': Icons.add_location_alt_outlined,
     'name': 'Add terminal',
-    'ui': const ComponentA(),
+    'ui': const AddTerminalDisplay(),
   },
   {
     'icon': Icons.add_road,
     'name': 'Add route',
-    'ui': const ComponentB(),
+    'ui': const AddRouteDisplay(),
   },
   {
     'icon': Icons.add_box,
     'name': 'Add station',
-    'ui': const ComponentA(),
+    'ui': const AddStationDisplay(),
   },
   {
     'icon': Icons.view_array_outlined,

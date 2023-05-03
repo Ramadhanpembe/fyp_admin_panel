@@ -16,7 +16,7 @@ class _TerminalComponentState extends State<TerminalComponent> {
 
   @override
   void initState() {
-    _terminals = firestoreManager.getAllTerminals();
+    _terminals = firestoreManager.getAvailableInRouteTerminals();
     super.initState();
   }
 

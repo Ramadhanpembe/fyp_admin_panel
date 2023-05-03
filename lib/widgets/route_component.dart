@@ -17,7 +17,7 @@ class _RouteComponentState extends State<RouteComponent> {
 
   @override
   void initState() {
-    _routeStream = firestoreManager.getAvailableRoutes();
+    _routeStream = firestoreManager.getAllRoutes();
     super.initState();
   }
 
@@ -51,7 +51,8 @@ class _RouteComponentState extends State<RouteComponent> {
                     }
                     final QuerySnapshot routeQuerySnapshot = snapshot.data!;
                     final List<QueryDocumentSnapshot> routeDocs = routeQuerySnapshot.docs;
-                    return InteractiveViewer(
+                    return SingleChildScrollView(
+                      scrollDirection: Axis.vertical,
                       child: DataTable(
                         columns: const [
                           DataColumn(label: Text('Name')),

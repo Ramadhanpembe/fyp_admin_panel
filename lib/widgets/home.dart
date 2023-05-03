@@ -2,8 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:fyp_admin_panel/data/resources.dart';
 import 'package:fyp_admin_panel/widgets/loading_indicator.dart';
+import 'package:fyp_admin_panel/widgets/station_display.dart';
 
-import '../models/terminal.dart';
 import 'display_badge.dart';
 
 class Home extends StatefulWidget {
@@ -18,13 +18,15 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   late final Stream<QuerySnapshot> _routeStream;
   late final Stream<QuerySnapshot> _driverStream;
-  late final Future<List<Terminal>> _terminals;
+  late final Stream<QuerySnapshot> _trashStream;
+  late final Stream<QuerySnapshot> _terminalStream;
 
   @override
   void initState() {
-    _terminals = firestoreManager.getAllTerminals();
-    _routeStream = firestoreManager.getAvailableRoutes();
-    _driverStream = firestoreManager.getAvailableDrivers();
+    _terminalStream = firestoreManager.getAllTerminals();
+    _routeStream = firestoreManager.getAllRoutes();
+    _driverStream = firestoreManager.getAllDrivers();
+    _trashStream = firestoreManager.getAllFromTrash();
     super.initState();
   }
 
@@ -43,9 +45,7 @@ class _HomeState extends State<Home> {
               color: Colors.white,
               borderRadius: BorderRadius.circular(12.0),
             ),
-            child: const Center(
-              child: Text('Display Stations'),
-            ),
+            child: const StationDisplay(),
           ),
         ),
         Expanded(
@@ -58,16 +58,17 @@ class _HomeState extends State<Home> {
                 Expanded(
                   child: DisplayBadge(
                     color: Colors.grey[100] ?? Colors.white,
-                    value: FutureBuilder<List<Terminal>>(
-                        future: _terminals,
+                    value: StreamBuilder<QuerySnapshot>(
+                        stream: _terminalStream,
                         builder: (context, snapshot) {
                           if (snapshot.connectionState == ConnectionState.waiting ||
                               snapshot.data == null) {
                             return const LoadingIndicator();
                           }
-                          final List<Terminal> terminals = snapshot.data!;
+                          final QuerySnapshot querySnapshot = snapshot.data!;
+                          final List<QueryDocumentSnapshot> terminalDocs = querySnapshot.docs;
                           return Text(
-                            '${terminals.length}',
+                            '${terminalDocs.length}',
                             style: const TextStyle(
                               fontSize: 72.0,
                               fontWeight: FontWeight.bold,
@@ -121,6 +122,30 @@ class _HomeState extends State<Home> {
                           );
                         }),
                     title: 'Drivers',
+                  ),
+                ),
+                const SizedBox(width: 12.0),
+                Expanded(
+                  child: DisplayBadge(
+                    value: StreamBuilder(
+                      stream: _trashStream,
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState == ConnectionState.waiting ||
+                            snapshot.data == null) {
+                          return const LoadingIndicator();
+                        }
+                        final QuerySnapshot querySnapshot = snapshot.data!;
+                        final List<QueryDocumentSnapshot> historyDocs = querySnapshot.docs;
+                        return Text(
+                          '${historyDocs.length}',
+                          style: const TextStyle(
+                            fontSize: 72.0,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        );
+                      },
+                    ),
+                    title: 'Done Requests',
                   ),
                 ),
               ],
