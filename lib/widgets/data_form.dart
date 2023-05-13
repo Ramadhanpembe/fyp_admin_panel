@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:fyp_admin_panel/data/resources.dart';
@@ -30,6 +32,9 @@ class _DataFormState extends State<DataForm> {
   final _formKey = GlobalKey<FormState>();
   List<bool?> _isChecked = [];
   List<QueryDocumentSnapshot> docs = [];
+
+  /// Added for the terminal issues
+  List<QueryDocumentSnapshot> terminalDocs = [];
 
   @override
   void initState() {
@@ -131,8 +136,8 @@ class _DataFormState extends State<DataForm> {
             child: const Text('DONE'),
             onPressed: () {
               isRoute
-                  ? selectedTerminalsNotifier.value = _selectedDocs
-                  : selectedRoutesNotifier.value = _selectedDocs;
+                  ? selectedTerminalsNotifier.value = _selectedDocs(isRoute)
+                  : selectedRoutesNotifier.value = _selectedDocs(isRoute);
               Navigator.pop(context);
             },
           ),
@@ -150,10 +155,28 @@ class _DataFormState extends State<DataForm> {
 
             final QuerySnapshot querySnapshot = snapshot.data!;
             docs = querySnapshot.docs;
-            _isChecked = List.generate(docs.length, (index) => false);
+
+            /// do something here to filter only terminalDocs with terminal_id not start with 1000!
+            ///
+            if (isRoute) {
+              for (var doc in docs) {
+                final int terminalID = doc['terminal_id'];
+                if (!terminalID.toString().startsWith('1000')) {
+                  log('Added doc ID: ${doc['terminal_id']}');
+                  terminalDocs.add(doc);
+                }
+              }
+            }
+
+            log('terminal docs length: ${terminalDocs.length}');
+
+            /// up to here
+
+            _isChecked =
+                List.generate(isRoute ? terminalDocs.length : docs.length, (index) => false);
 
             return ListView.builder(
-              itemCount: docs.length,
+              itemCount: isRoute ? terminalDocs.length : docs.length,
               itemBuilder: (context, index) {
                 return Material(
                   child: StatefulBuilder(
@@ -164,7 +187,7 @@ class _DataFormState extends State<DataForm> {
                         checkColor: Colors.white,
                         activeColor: Colors.black,
                         title: Text(isRoute
-                            ? docs[index]['terminal_name']
+                            ? terminalDocs[index]['terminal_name']
                             : '${docs[index]['from_terminal']} - ${docs[index]['to_terminal']}'),
                         onChanged: (bool? value) async {
                           if (isRoute) {
@@ -181,8 +204,9 @@ class _DataFormState extends State<DataForm> {
                                 final List<QueryDocumentSnapshot> terminalDocs =
                                     terminalQuerySnapshot.docs;
                                 for (var terminalDoc in terminalDocs) {
-                                  if (terminalDoc['terminal_name'] ==
-                                      docs[index]['terminal_name']) {
+                                  /// changed from terminal_name to terminal_id
+                                  if (terminalDoc['terminal_id'] ==
+                                      terminalDocs[index]['terminal_id']) {
                                     state(() {
                                       isPreAdded = true;
                                     });
@@ -254,10 +278,10 @@ class _DataFormState extends State<DataForm> {
     return indices;
   }
 
-  List<QueryDocumentSnapshot> get _selectedDocs {
+  List<QueryDocumentSnapshot> _selectedDocs(bool isRoute) {
     List<QueryDocumentSnapshot> selectedDocs = [];
     for (int index in _selectedIndices) {
-      selectedDocs.add(docs[index]);
+      selectedDocs.add(isRoute ? terminalDocs[index] : docs[index]);
     }
     return selectedDocs;
   }

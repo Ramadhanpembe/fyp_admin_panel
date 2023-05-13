@@ -32,6 +32,22 @@ class FirestoreManager {
     });
   }
 
+  /// This method had to be added, in order to get the new format of the terminal name even if
+  /// they co-exist in the same terminal collection
+  void createReversedTerminal(Terminal terminal) async {
+    final CollectionReference terminalColRef = _db.collection('terminals');
+    final DocumentReference terminalDocRef =
+        terminalColRef.doc('@${terminal.terminalName}@reversed@${terminal.terminalID}@');
+    terminalDocRef.set({
+      'terminal_id': terminal.terminalID,
+      'terminal_name': terminal.terminalName,
+      'terminal_location': {
+        'terminal_latitude': terminal.terminalLocation.latitude,
+        'terminal_longitude': terminal.terminalLocation.longitude,
+      }
+    });
+  }
+
   Stream<QuerySnapshot> getAllStations() {
     return _db.collection('stations').snapshots();
   }
@@ -48,6 +64,10 @@ class FirestoreManager {
     return await _db.collection('stations').get();
   }
 
+  Future<QuerySnapshot> getAvailableTerminals() async {
+    return await _db.collection('terminals').get();
+  }
+
   Stream<QuerySnapshot> getAllDrivers() {
     return _db.collection('drivers').snapshots();
   }
@@ -58,6 +78,34 @@ class FirestoreManager {
 
   Stream<QuerySnapshot> getAllTerminals() {
     return _db.collection('terminals').snapshots();
+  }
+
+  /// Get a terminal with [terminalName] but not a [terminalID]
+  Future<Terminal> getTerminal(String terminalName) async {
+    final QuerySnapshot terminalQuerySnapshot =
+        await _db.collection('terminals').where('terminal_name', isEqualTo: terminalName).get();
+    final List<QueryDocumentSnapshot> terminalDocs = terminalQuerySnapshot.docs;
+    for (var terminalDoc in terminalDocs) {
+      if (terminalDoc.id ==
+          '@${terminalDoc['terminal_name']}@reversed@${terminalDoc['terminal_id']}@') {
+        return Terminal(
+          terminalID: terminalDoc['terminal_id'],
+          terminalName: terminalDoc['terminal_name'],
+          terminalLocation: TerminalLocation(
+              latitude: terminalDoc['terminal_location']['terminal_latitude'],
+              longitude: terminalDoc['terminal_location']['terminal_longitude']),
+          totalRequests: 0,
+          requests: [],
+        );
+      }
+    }
+    return const Terminal(
+      terminalID: 0,
+      terminalName: '',
+      terminalLocation: TerminalLocation(latitude: 0, longitude: 0),
+      totalRequests: 0,
+      requests: [],
+    );
   }
 
   /// DONE! Works perfectly!!
@@ -178,7 +226,8 @@ class FirestoreManager {
 
     final CollectionReference terminalColRef = mainDocRef.collection('terminals');
     for (var terminal in route.routeTerminals) {
-      final DocumentReference terminalDocRef = terminalColRef.doc('@${terminal.terminalName}@');
+      final DocumentReference terminalDocRef =
+          terminalColRef.doc('@${terminal.terminalName}@${terminal.terminalID}');
       terminalDocRef.set({
         'terminal_id': terminal.terminalID,
         'terminal_name': terminal.terminalName,

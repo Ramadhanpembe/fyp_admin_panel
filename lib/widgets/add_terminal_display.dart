@@ -158,6 +158,9 @@ class _AddTerminalDisplayState extends State<AddTerminalDisplay> {
                   if (value == null || value.trim().isEmpty) {
                     return 'Terminal name cannot be null';
                   }
+
+                  /// remove this validator to allow adding the same terminal name more than once
+                  /// - but wait please
                   for (var name in _terminalNames) {
                     if (value.toLowerCase() == name.toLowerCase()) {
                       return 'Terminal name already exist!';
@@ -168,16 +171,33 @@ class _AddTerminalDisplayState extends State<AddTerminalDisplay> {
               ),
             ],
             onPressed: () {
-              firestoreManager.createTerminal(Terminal(
-                terminalID: int.parse(_idController.text),
-                terminalName: _nameController.text,
-                totalRequests: 0,
-                terminalLocation: const TerminalLocation(
-                  latitude: 0.0,
-                  longitude: 0.0,
+              firestoreManager.createTerminal(
+                Terminal(
+                  terminalID: int.parse(_idController.text),
+                  terminalName: _nameController.text,
+                  totalRequests: 0,
+                  terminalLocation: const TerminalLocation(
+                    latitude: 0.0,
+                    longitude: 0.0,
+                  ),
+                  requests: [],
                 ),
-                requests: [],
-              ));
+              );
+
+              /// this added to create the reversed terminal automatically without double user
+              /// inputs
+              firestoreManager.createReversedTerminal(
+                Terminal(
+                  terminalID: int.parse('1000${_idController.text}'),
+                  terminalName: _nameController.text,
+                  totalRequests: 0,
+                  terminalLocation: const TerminalLocation(
+                    latitude: 0.0,
+                    longitude: 0.0,
+                  ),
+                  requests: [],
+                ),
+              );
               return true;
             },
           ),

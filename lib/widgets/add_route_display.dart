@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:fyp_admin_panel/models/terminal_location.dart';
@@ -21,6 +19,9 @@ class AddRouteDisplay extends StatefulWidget {
 class _AddRouteDisplayState extends State<AddRouteDisplay> {
   late final Stream<QuerySnapshot> _routeStream;
   final List<String> _routeIDs = [];
+
+  /// added new!
+  late final QuerySnapshot _terminalQuerySnapshot;
   final TextEditingController _idController = TextEditingController();
   final TextEditingController _fromController = TextEditingController();
   final TextEditingController _toController = TextEditingController();
@@ -34,10 +35,15 @@ class _AddRouteDisplayState extends State<AddRouteDisplay> {
     });
   }
 
+  void _allTerminals() async {
+    _terminalQuerySnapshot = await firestoreManager.getAvailableTerminals();
+  }
+
   @override
   void initState() {
     _routeStream = firestoreManager.getAllRoutes();
     _allRoutes();
+    _allTerminals();
     super.initState();
   }
 
@@ -179,20 +185,37 @@ class _AddRouteDisplayState extends State<AddRouteDisplay> {
               ),
             ],
             onPressed: () {
-              log('Length? ${selectedTerminalsNotifier.value.length}');
+              final List<QueryDocumentSnapshot> allTerminalDocs = _terminalQuerySnapshot.docs;
               final List<QueryDocumentSnapshot> selectedTerminalDocs =
                   selectedTerminalsNotifier.value;
               List<Terminal> terminals = [];
-              for (var selectedTerminal in selectedTerminalDocs) {
-                terminals.add(Terminal(
-                  terminalID: selectedTerminal['terminal_id'],
-                  terminalName: selectedTerminal['terminal_name'],
-                  terminalLocation: TerminalLocation(
-                      latitude: selectedTerminal['terminal_location']['terminal_latitude'],
-                      longitude: selectedTerminal['terminal_location']['terminal_longitude']),
-                  totalRequests: 0,
-                  requests: [],
-                ));
+              for (var terminalDoc in allTerminalDocs) {
+                for (var selectedTerminal in selectedTerminalDocs) {
+                  if (terminalDoc['terminal_name'] == selectedTerminal['terminal_name'] &&
+                      !selectedTerminal['terminal_id'].toString().startsWith('1000')) {
+                    terminals.add(Terminal(
+                      terminalID: selectedTerminal['terminal_id'],
+                      terminalName: selectedTerminal['terminal_name'],
+                      terminalLocation: TerminalLocation(
+                          latitude: selectedTerminal['terminal_location']['terminal_latitude'],
+                          longitude: selectedTerminal['terminal_location']['terminal_longitude']),
+                      totalRequests: 0,
+                      requests: [],
+                    ));
+                  }
+                  if (terminalDoc['terminal_name'] == selectedTerminal['terminal_name'] &&
+                      terminalDoc['terminal_id'].toString().startsWith('1000')) {
+                    terminals.add(Terminal(
+                      terminalID: terminalDoc['terminal_id'],
+                      terminalName: terminalDoc['terminal_name'],
+                      terminalLocation: TerminalLocation(
+                          latitude: terminalDoc['terminal_location']['terminal_latitude'],
+                          longitude: terminalDoc['terminal_location']['terminal_longitude']),
+                      totalRequests: 0,
+                      requests: [],
+                    ));
+                  }
+                }
               }
               final String routeRef =
                   '@${_fromController.text.toUpperCase()}@${_toController.text.toUpperCase()}@';
